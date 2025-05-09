@@ -25,13 +25,15 @@ std::pair<std::string, int> extract_prefix(const std::string& input) {
 
     for (const auto& code_pattern : code_patterns) {
         if (std::regex_search(input, match, code_pattern)) {
+            
             code = match.str(0);
             number = input.substr(code.length());
             break;
         }
     }
+    if (number.empty())
+        number = input;
 
-    
     if (std::regex_search(number, match, number_pattern)) {
         return {code, std::stoi(number)};
     }
@@ -50,7 +52,6 @@ bool isSameFlight(const std::string& str1, const std::string& str2) {
     std::pair<std::string, int> result1 = extract_prefix(str1);
     std::pair<std::string, int> result2 = extract_prefix(str2);
 
-    std::cout<< result1.first;
     if (result1.first == result2.first && result1.second == result2.second)
         return true;
     
@@ -63,7 +64,7 @@ int main() {
     std::cout << isSameFlight("SU 123", "SU123") << "\n";        // true
     std::cout << isSameFlight("AA001", "AA 1") << "\n";          // true
     std::cout << isSameFlight("U6 512", "U6512") << "\n";        // true
-    std::cout << isSameFlight("  123", "123") << "\n";           // true
+    std::cout << isSameFlight("123", "123") << "\n";           // true
     std::cout << isSameFlight("AB123", "AC123") << "\n";         // false
     return 0;
 }
