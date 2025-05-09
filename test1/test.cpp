@@ -26,7 +26,12 @@ std::pair<std::string, int> extract_prefix(const std::string& input) {
         }
     }
 
-    return {code, std::stoi(number)};  // нет совпадения
+    
+    if (std::regex_search(number, match, number_pattern)) {
+        return {code, std::stoi(number)};
+    }
+    
+    throw std::invalid_argument("Ошибка: строка не соответствует ожидаемому формату (не найдено число).");
 }
 
 int main() {
