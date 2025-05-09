@@ -6,6 +6,44 @@
 #include <thread>
 #include <mutex>
 
+
+std::pair<std::string, int> pars_flighting_string(const std::string& input) {
+    std::vector<std::regex> code_patterns = {
+        std::regex(R"(^[A-Z]{3})"),
+        std::regex(R"(^[A-Z]{2} ?)"),
+        std::regex(R"(^[0-9][A-Z] ?)"),
+        std::regex(R"(^[A-Z][0-9] ?)"),
+    };
+
+    std::regex number_pattern = std::regex(R"(^\d{1,5}$)");
+    
+    std::smatch match;
+    std::string code = "";
+    std::string number = "";
+
+    for (const auto& code_pattern : code_patterns) {
+        if (std::regex_search(input, match, code_pattern)) {
+            int code_size = match.str(0).size();
+            if (match.str(0)[code_size-1] == ' ')
+                code = match.str(0).substr(0, code_size-1);
+            else
+                code = match.str(0);
+
+            number = input.substr(code_size);
+            break;
+        }
+    }
+    if (number.empty())
+        number = input;
+
+    if (std::regex_search(number, match, number_pattern)) {
+        return {code, std::stoi(number)};
+    }
+
+    throw std::invalid_argument("error in line"+input);
+}
+
+
 // Обрабатывает файл: удаляет неуникальные строки
 void process_file(const std::string& input_filename, const std::string& output_filename) {
     std::ifstream infile(input_filename);
