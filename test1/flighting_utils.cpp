@@ -1,8 +1,6 @@
 #include <iostream>
-#include <string>
-#include <cctype>
-#include <utility>
 #include <regex>
+
 #include "flighting_utils.h"
 
 
@@ -11,39 +9,37 @@ const int MAX_ID_LEN = 5;
 
 
 std::pair<std::string, int> pars_flighting_string(const std::string& input) {
-    std::vector<std::regex> code_patterns = {
-        std::regex(R"(^[A-Z]{3})"),
-        std::regex(R"(^[A-Z]{2} ?)"),
-        std::regex(R"(^[0-9][A-Z] ?)"),
-        std::regex(R"(^[A-Z][0-9] ?)"),
-    };
+    // regular expression for airline code
+    std::regex code_pattern = std::regex(
+        R"(^[A-Z]{3}|^[A-Z]{2} ?|^[0-9][A-Z] ?|^[A-Z][0-9] ?)"
+    );
 
+    // regular expression for flight number
     std::regex number_pattern = std::regex(R"(^\d{1,5}$)");
     
     std::smatch match;
     std::string code = "";
     std::string number = "";
 
-    for (const auto& code_pattern : code_patterns) {
-        if (std::regex_search(input, match, code_pattern)) {
-            int code_size = match.str(0).size();
-            if (match.str(0)[code_size-1] == ' ')
-                code = match.str(0).substr(0, code_size-1);
-            else
-                code = match.str(0);
+    // find the airline code
+    if (std::regex_search(input, match, code_pattern)) {
+        int code_size = match.str(0).size();
+        // delete last space
+        if (match.str(0)[code_size-1] == ' ')
+            code = match.str(0).substr(0, code_size-1);
+        else
+            code = match.str(0);
 
-            number = input.substr(code_size);
-            break;
-        }
-    }
-    if (number.empty())
+        number = input.substr(code_size);
+    } else
         number = input;
 
+    // find the flight number
     if (std::regex_search(number, match, number_pattern)) {
         return {code, std::stoi(number)};
     }
     
-    throw std::invalid_argument("format error in line: "+input);
+    throw std::invalid_argument("Format error in line: "+input);
 }
 
 
