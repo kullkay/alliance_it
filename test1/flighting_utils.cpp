@@ -15,7 +15,8 @@ std::pair<std::string, int> pars_flighting_string(const std::string& input) {
     );
 
     // regular expression for flight number
-    std::regex number_pattern = std::regex(R"(^\d{1,5}$)");
+    std::string pattern = "^\\d{1," + std::to_string(MAX_ID_LEN) + "}$";
+    std::regex number_pattern = std::regex(pattern);
     
     std::smatch match;
     std::string code = "";
@@ -47,10 +48,17 @@ bool isSameFlight(const std::string& str1, const std::string& str2) {
     const size_t len_str1 = str1.size();
     const size_t len_str2 = str2.size();
 
-    
-    if (std::max(len_str1, len_str2) > MAX_STR_LEN && std::min(len_str1, len_str2) > 0)
-        return false;
+    // check strings len
+    if (len_str1 > MAX_STR_LEN){
+        std::string e_msg = "In first line: maximum line length " + std::to_string(MAX_STR_LEN);
+        throw std::invalid_argument(e_msg);
+    }
+    if (len_str2 > MAX_STR_LEN){
+        std::string e_msg = "In second line: maximum line length " + std::to_string(MAX_STR_LEN);
+        throw std::invalid_argument(e_msg);
+    }
 
+    // pars strings
     std::pair<std::string, int> result1;
     std::pair<std::string, int> result2;
     try {
@@ -67,6 +75,7 @@ bool isSameFlight(const std::string& str1, const std::string& str2) {
         throw std::invalid_argument("In second line: "+e_str);
     }
 
+    // comparison of records
     if (result1.first == result2.first && result1.second == result2.second)
         return true;
     return false;

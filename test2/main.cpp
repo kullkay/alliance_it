@@ -14,6 +14,7 @@ struct FlightingRecords {
     public:
         bool add_records(std::pair<std::string, int> record) {
             std::lock_guard<std::mutex> guard(_mtx);
+    
             std::size_t len = _unique_records.size();
             _unique_records.insert({record.first, record.second});
             if (len==_unique_records.size()) 

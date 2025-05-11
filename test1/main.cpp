@@ -11,6 +11,7 @@ int main() {
     std::cout << isSameFlight("U6 512", "U6512") << "\n";        // true
     std::cout << isSameFlight("123", "123") << "\n";           // true
     std::cout << isSameFlight("AB123", "AC123") << "\n";         // false
-    std::cout << isSameFlight("SUD 123", "SU123") << "\n";        // error
+    //std::cout << isSameFlight("SUD 123", "SU123") << "\n";        // error
+    //std::cout << isSameFlight("SUD 123111", "SU123111") << "\n";        // error
     return 0;
 }
