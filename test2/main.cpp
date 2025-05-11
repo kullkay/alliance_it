@@ -3,7 +3,10 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <regex>
 #include <thread>
+#include <mutex>
+#include <set>
 #include <mutex>
 
 
@@ -44,45 +47,56 @@ std::pair<std::string, int> pars_flighting_string(const std::string& input) {
 }
 
 
-// Обрабатывает файл: удаляет неуникальные строки
-void process_file(const std::string& input_filename, const std::string& output_filename) {
+struct FlightingRecords {
+    protected:
+        std::set<std::pair<std::string, int>> _unique_records;
+        std::mutex _mtx;
+    public:
+        bool add_records(std::pair<std::string, int> record) {
+            std::lock_guard<std::mutex> guard(_mtx);
+            int len = _unique_records.size();
+            _unique_records.insert({record.first, record.second});
+            if (len==_unique_records.size()) 
+                return false;
+            return true;
+        }
+};
+
+
+void process_file(
+    const std::string& input_filename,
+    const std::string& output_filename,
+    FlightingRecords& db
+) {
     std::ifstream infile(input_filename);
+    std::ofstream outfile(output_filename);
+
     if (!infile.is_open()) {
         std::cerr << "Не удалось открыть " << input_filename << std::endl;
         return;
     }
-
-    std::unordered_map<std::string, int> line_count;
-    std::vector<std::string> lines;
-    std::string line;
-
-    // Считаем количество повторений каждой строки
-    while (std::getline(infile, line)) {
-        ++line_count[line];
-        lines.push_back(line);
-    }
-
-    infile.close();
-
-    // Записываем только уникальные строки
-    std::ofstream outfile(output_filename);
     if (!outfile.is_open()) {
         std::cerr << "Не удалось открыть " << output_filename << std::endl;
         return;
     }
 
-    for (const auto& l : lines) {
-        if (line_count[l] == 1) {
-            outfile << l << '\n';
-        }
-    }
+    std::string record;
+    std::getline(infile, record);
 
+    if (db.add_records(pars_flighting_string(record)))
+        outfile<<record<<'\n';
+    else 
+        std::cout<<"wrong"<<'\n';
+
+    infile.close();
     outfile.close();
 }
 
+
 int main() {
-    std::thread t1(process_file, "1_in.txt", "1_out.txt");
-    std::thread t2(process_file, "2_in.txt", "2_out.txt");
+    FlightingRecords db;
+    std::thread t1(process_file, "1_in.txt", "1_out.txt", std::ref(db));
+    std::thread t2(process_file, "2_in.txt", "2_out.txt", std::ref(db));
 
     t1.join();
     t2.join();
