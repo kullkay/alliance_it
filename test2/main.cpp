@@ -4,7 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <set>
-#include "flighting_utils.h"
+#include "../test1/flighting_utils.h"
 
 
 struct FlightingRecords {
@@ -14,7 +14,7 @@ struct FlightingRecords {
     public:
         bool add_records(std::pair<std::string, int> record) {
             std::lock_guard<std::mutex> guard(_mtx);
-            int len = _unique_records.size();
+            std::size_t len = _unique_records.size();
             _unique_records.insert({record.first, record.second});
             if (len==_unique_records.size()) 
                 return false;
@@ -23,7 +23,7 @@ struct FlightingRecords {
 };
 
 
-void process_file(
+void parsing_flighting_file(
     const std::string& input_filename,
     const std::string& output_filename,
     FlightingRecords& db
@@ -53,8 +53,8 @@ void process_file(
 
 int main() {
     FlightingRecords db;
-    std::thread t1(process_file, "1_in.txt", "1_out.txt", std::ref(db));
-    std::thread t2(process_file, "2_in.txt", "2_out.txt", std::ref(db));
+    std::thread t1(parsing_flighting_file, "1_in.txt", "1_out.txt", std::ref(db));
+    std::thread t2(parsing_flighting_file, "2_in.txt", "2_out.txt", std::ref(db));
 
     t1.join();
     t2.join();
