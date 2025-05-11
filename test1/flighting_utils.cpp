@@ -9,6 +9,11 @@ const int MAX_ID_LEN = 5;
 
 
 std::pair<std::string, int> pars_flighting_string(const std::string& input) {
+    if (input.size() > MAX_STR_LEN){
+        std::string e_msg = "Maximum line length " + std::to_string(MAX_STR_LEN);
+        throw std::invalid_argument(e_msg);
+    }
+
     // regular expression for airline code
     std::regex code_pattern = std::regex(
         R"(^[A-Z]{3}|^[A-Z]{2} ?|^[0-9][A-Z] ?|^[A-Z][0-9] ?)"
