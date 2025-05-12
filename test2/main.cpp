@@ -20,15 +20,16 @@ struct DBFlightingRecords {
         std::mutex _mtx;
     public:
         std::map<std::pair<std::string, int>, FlightingRecord> records;
+
         bool add_records(FlightingRecord& record) {
             std::lock_guard<std::mutex> guard(_mtx);
+
             std::pair<std::string, int> record_key = pars_flighting_string(record.record_str);
             auto old_record = records.find(record_key);
             if (old_record != records.end()) {
                 old_record->second.unique = false;
                 return false;
             }
-
             records.insert(std::make_pair (record_key, record));
             return true;
         }
